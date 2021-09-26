@@ -112,17 +112,12 @@ void loop() {
       break;
     case 1:
       jump(25, 5);
-//      delay(50);
-//      headLights(OFF);
-//      rearLights(OFF);
-//      delay(50);
-//      headLights(ON);
-//      rearLights(ON);
-//      allOn();
-//      delay(50);
-//      allOff();
       break;
     case 2:
+      headLights(ON);
+      rearLights(ON);
+      break;
+    case 3:
       allOff();
       break;
 
@@ -130,6 +125,8 @@ void loop() {
 
 
   /*
+  
+  
 
     switch (buttonCounter) {
       case 0:
@@ -181,6 +178,16 @@ void loop() {
     }
   */
 
+  //      delay(50);
+//      headLights(OFF);
+//      rearLights(OFF);
+//      delay(50);
+//      headLights(ON);
+//      rearLights(ON);
+//      allOn();
+//      delay(50);
+//      allOff();
+  
   // to do
   // flight rear lights on
 }
