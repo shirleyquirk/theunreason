@@ -1,3 +1,6 @@
+#include <EEPROM.h>
+
+
 int relays = 48;           //number of relays to use
 int strt = 6;
 int side = 24;
@@ -27,7 +30,9 @@ int head_length = headA_length;
 
 const int BUTTON_PIN = 69;
 
-int buttonCounter = 0;   // counter for the number of button presses
+unsigned char buttonCounter;   // counter for the number of button presses
+#define buttonCounterAddr 0
+
 int buttonState = 0;         // current state of the button
 int lastButtonState = 0;     // previous state of the button
 
@@ -45,19 +50,86 @@ const int OFF = HIGH;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("<Arduino is ready>");
-
   pinMode(A15, INPUT_PULLUP);
-
   for (int i = strt; i < strt + relays; i++) {
     pinMode(i, OUTPUT);                 // initiate relays to digital outputs on arduino
     digitalWrite(i, HIGH);              // turn all off to being with
   }
+  buttonCounter = EEPROM.read(buttonCounterAddr);
+  /*
+   * the first time this code is booted, buttonCounter will be 255
+   * so nothing will display. next time the button is pressed,
+   * buttonCounter will get set to a valid value
+   */
   Serial.println("<SETUP COMPLETE>");
 
 } // end of setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Uncomment to use the animation arrays instead of the switch case statements
+//#define ANIMATION_ARRAY
+
+#ifdef ANIMATION_ARRAY
+typedef void (*animation)();
+
+animation twoStates[] = {
+  allOff,
+  [](){
+    whoop(100,0);
+    allOff();
+    //delay(50);
+    headLights(ON);
+    rearLights(ON);
+  }
+};
+
+animation fourStates[] = {
+  [](){chase(50,80);},
+  [](){jump(25,5);},
+  [](){headLights(ON);rearLights(ON);},
+  allOff
+};
+
+animation elevenStates[] = {
+  allOff,
+  [](){chase(80,50);},
+  [](){
+    whoop(100,0);
+    allOff();
+    headLights(ON);
+    rearLights(ON);
+  },
+  [](){
+    fillUp(20);
+    delay(100);
+    allOff();
+    delay(50);
+    allOn();
+    delay(50);
+    allOff();
+    delay(1000);
+  },
+  [](){jump(25,5);},
+  [](){landing(100,1000);},
+  [](){lighthouse(100,50);},
+  [](){fairground(150,150);},
+  [](){whoop(50,10);},
+  [](){superCruise(60,10);},
+  [](){flight(50,30);}
+};
+
+//set which animation array to use here:
+#define animation_states fourStates
+
+#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
+#define N_BUTTON_STATES ARRAY_SIZE(animation_states)
+
+#else
+  //PLEASE REMEMBER TO SET N_BUTTON_STATES TO THE SAME AS
+  //THE NUMBER OF CASE STATEMENTS
+#define N_BUTTON_STATES 4
+#endif /*ANIMATION_ARRAY*/
 
 void loop() {
 
@@ -67,7 +139,8 @@ void loop() {
   // compare the buttonState to its previous state
   if (buttonState != lastButtonState) {
     if (buttonState == LOW) {
-      buttonCounter = (buttonCounter + 1) % 11;
+      buttonCounter = (buttonCounter + 1) % N_BUTTON_STATES;
+      EEPROM.write(buttonCounterAddr,buttonCounter);
       // turn off all the lights on pattern change
       allOff();
       count = 0;
@@ -82,9 +155,16 @@ void loop() {
   lastButtonState = buttonState;
 
 
+  /*instead of using the switch case
+   * we can use our array full of lambdas
+   *
+   * but make sure buttonCounter < length of animation_states
+   */
+#ifdef ANIMATION_ARRAY
+  animation_states[buttonCounter]();
+#else
 
   /*
-     buttonCounter = (buttonCounter) % 2;
     ///// returning
 
       switch (buttonCounter) {
@@ -102,10 +182,9 @@ void loop() {
   */
 
 
-
-  buttonCounter = (buttonCounter) % 3;
   ///// arriving
 
+  
   switch (buttonCounter) {
     case 0:
       chase(80, 50);
@@ -120,6 +199,8 @@ void loop() {
     case 3:
       allOff();
       break;
+    default:
+      allOff();
 
   }
 
@@ -177,6 +258,7 @@ void loop() {
         break;
     }
   */
+#endif /*ANIMATION_ARRAY*/
 
   //      delay(50);
 //      headLights(OFF);
@@ -461,7 +543,7 @@ void fillUp(int onTime) {
 
 void chase(int onTime, int offTime) {
 
-   haedLights(ON);
+    headLights(ON);
     delay(onTime * 2);                                        // on time
     headLights(OFF);
     delay(offTime * 2);                                      // off time
@@ -487,8 +569,6 @@ void chase(int onTime, int offTime) {
     rearLights(OFF);
     delay(offTime * 2);                                      // off time
 
-  
-  }
 }
 
 void lighthouse(int onTime, int offTime) {
