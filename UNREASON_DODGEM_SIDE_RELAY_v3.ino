@@ -477,13 +477,20 @@ void chase(int onTime, int offTime) {
     /////////////////////////////////////////////////////////////////////////////
   }
 
-  for (int i = 0; i < rear_length; i++)   {
+    rearLights(ON);
+    delay(onTime * 2);                                        // on time
+    rearLights(OFF);
+    delay(offTime * 2);                                      // off time
+
+  /*
+    for (int i = 0; i < rear_length; i++)   {
     digitalWrite(rearA[i], ON);
     digitalWrite(rearB[i], ON);
     delay(onTime * 2);                                        // on time
     digitalWrite(rearA[i], OFF);
     digitalWrite(rearB[i], OFF);
     delay(offTime * 2);                                      // off time
+    */
   }
 }
 
