@@ -454,14 +454,12 @@ void fillUp(int onTime) {
 
 void chase(int onTime, int offTime) {
 
-  for (int i = 0; i < head_length; i++)   {
-    digitalWrite(headA[i], ON);
-    digitalWrite(headB[i], ON);
-    delay(onTime);                                          // on time
-    digitalWrite(headA[i], OFF);
-    digitalWrite(headB[i], OFF);
-    delay(offTime);                                        // off time
-  }
+   haedLights(ON);
+    delay(onTime * 2);                                        // on time
+    headLights(OFF);
+    delay(offTime * 2);                                      // off time
+  
+  
   for (int i = 0; i < side_length; i++) {
     digitalWrite(sideA[i], ON);
     if (i > 10 && i < 14) digitalWrite(seatA[i - 11], ON);
@@ -482,15 +480,7 @@ void chase(int onTime, int offTime) {
     rearLights(OFF);
     delay(offTime * 2);                                      // off time
 
-  /*
-    for (int i = 0; i < rear_length; i++)   {
-    digitalWrite(rearA[i], ON);
-    digitalWrite(rearB[i], ON);
-    delay(onTime * 2);                                        // on time
-    digitalWrite(rearA[i], OFF);
-    digitalWrite(rearB[i], OFF);
-    delay(offTime * 2);                                      // off time
-    */
+  
   }
 }
 
