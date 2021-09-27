@@ -68,7 +68,7 @@ void setup() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Uncomment to use the animation arrays instead of the switch case statements
-//#define ANIMATION_ARRAY
+#define ANIMATION_ARRAY
 
 #ifdef ANIMATION_ARRAY
 typedef void (*animation)();
