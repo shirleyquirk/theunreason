@@ -1,5 +1,13 @@
 #include <EEPROM.h>
-
+#ifdef BUTTON_INTERRUPTS
+#include <setjmp.h>
+jmp_buf jumpToReset;
+void yield(void){
+  if(buttonCounter!=cachedButtonCounter){
+    longjmp(jumpToReset);
+  }
+}
+#endif
 
 int relays = 48;           //number of relays to use
 int strt = 6;
@@ -30,7 +38,8 @@ int head_length = headA_length;
 
 const int BUTTON_PIN = 69;
 
-unsigned char buttonCounter;   // counter for the number of button presses
+volatile unsigned char buttonCounter;   // counter for the number of button presses
+unsigned char cachedButtonCounter;
 #define buttonCounterAddr 0
 
 int buttonState = 0;         // current state of the button
@@ -48,6 +57,21 @@ int o = 0;
 const int ON = LOW;
 const int OFF = HIGH;
 
+/************************************************/
+/*     Button Interrupt                         */
+
+void my_interrupt_handler()
+{
+  static unsigned long last_interrupt_time = 0;
+  unsigned long interrupt_time = millis();
+  // If interrupts come faster than 200ms, assume it's a bounce and ignore
+  if (interrupt_time - last_interrupt_time > 200) 
+  {
+    buttonCounter++;
+  }
+  last_interrupt_time = interrupt_time;
+}
+
 void setup() {
   Serial.begin(9600);
   pinMode(A15, INPUT_PULLUP);
@@ -62,7 +86,6 @@ void setup() {
    * buttonCounter will get set to a valid value
    */
   Serial.println("<SETUP COMPLETE>");
-
 } // end of setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,9 +182,9 @@ animation elevenStates[] = {
 #endif /*ANIMATION_ARRAY*/
 
 void loop() {
-
+  
   delay(5);
-
+#ifndef BUTTON_INTERRUPTS
   buttonState = digitalRead(BUTTON_PIN);
   // compare the buttonState to its previous state
   if (buttonState != lastButtonState) {
@@ -180,7 +203,17 @@ void loop() {
     delay(5);    // Delay a little bit to avoid bouncing
   }
   lastButtonState = buttonState;
-
+#else
+  if (buttonCounter != cachedButtonCounter){
+    setjmp(jumptoReset);
+    EEPROM.write(buttonCounterAddr,buttonCounter);
+    cachedButtonCounter = buttonCounter;
+    Serial.print("buttonCounter: ");
+    Serial.println(buttonCounter);
+    allOff()
+    count=0;
+  }
+#endif
 
   /*instead of using the switch case
    * we can use our array full of lambdas
