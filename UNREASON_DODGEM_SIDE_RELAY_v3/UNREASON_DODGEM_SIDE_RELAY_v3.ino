@@ -85,15 +85,24 @@ animation twoStates[] = {
 };
 
 animation fourStates[] = {
-  [](){chase(50,80);},
-  [](){jump(25,5);},
-  [](){headLights(ON);rearLights(ON);},
+  [](){
+    chase(50,80);
+  },
+  [](){
+    jump(25,5);
+  },
+  [](){
+    headLights(ON);
+    rearLights(ON);
+  },
   allOff
 };
 
 animation elevenStates[] = {
   allOff,
-  [](){chase(80,50);},
+  [](){
+    chase(80,50);
+  },
   [](){
     whoop(100,0);
     allOff();
@@ -110,22 +119,40 @@ animation elevenStates[] = {
     allOff();
     delay(1000);
   },
-  [](){jump(25,5);},
-  [](){landing(100,1000);},
-  [](){lighthouse(100,50);},
-  [](){fairground(150,150);},
-  [](){whoop(50,10);},
-  [](){superCruise(60,10);},
-  [](){flight(50,30);}
+  [](){
+    jump(25,5);
+  },
+  [](){
+    landing(100,1000);
+  },
+  [](){
+    lighthouse(100,50);
+  },
+  [](){
+    fairground(150,150);
+  },
+  [](){
+    whoop(50,10);
+  },
+  [](){
+    superCruise(60,10);
+  },
+  [](){
+    flight(50,30);
+  }
 };
 
-//set which animation array to use here:
+/********************************************/
+/* set which animation array to use here:   */
 #define animation_states fourStates
+/********************************************/
+
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 #define N_BUTTON_STATES ARRAY_SIZE(animation_states)
 
 #else
+  //IF USING CASE STATEMENTS
   //PLEASE REMEMBER TO SET N_BUTTON_STATES TO THE SAME AS
   //THE NUMBER OF CASE STATEMENTS
 #define N_BUTTON_STATES 4
@@ -607,3 +634,4 @@ void lighthouse(int onTime, int offTime) {
 
 
 }
+
