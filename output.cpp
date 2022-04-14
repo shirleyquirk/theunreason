@@ -1,16 +1,7 @@
+#include <Arduino.h>
+#line 1 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
 #include <EEPROM.h>
-volatile unsigned char buttonCounter;   // counter for the number of button presses
-unsigned char cachedButtonCounter;
-#
-#ifdef BUTTON_INTERRUPTS
-#include <setjmp.h>
-jmp_buf jumpToReset;
-void yield(void){
-  if(buttonCounter!=cachedButtonCounter){
-    longjmp(jumpToReset,1);
-  }
-}
-#endif
+
 
 int relays = 48;           //number of relays to use
 int strt = 6;
@@ -41,6 +32,7 @@ int head_length = headA_length;
 
 const int BUTTON_PIN = 69;
 
+unsigned char buttonCounter;   // counter for the number of button presses
 #define buttonCounterAddr 0
 
 int buttonState = 0;         // current state of the button
@@ -58,21 +50,39 @@ int o = 0;
 const int ON = LOW;
 const int OFF = HIGH;
 
-/************************************************/
-/*     Button Interrupt                         */
-
-void my_interrupt_handler()
-{
-  static unsigned long last_interrupt_time = 0;
-  unsigned long interrupt_time = millis();
-  // If interrupts come faster than 200ms, assume it's a bounce and ignore
-  if (interrupt_time - last_interrupt_time > 200) 
-  {
-    buttonCounter++;
-  }
-  last_interrupt_time = interrupt_time;
-}
-
+#line 51 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void setup();
+#line 161 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void loop();
+#line 304 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void landing(int time1, int time2);
+#line 355 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void allOn();
+#line 366 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void allOff();
+#line 377 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void jump(int onTime, int offTime);
+#line 413 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void superCruise(int onTime, int offTime);
+#line 439 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void fairground(int time1, int time2);
+#line 489 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void flight(int onTime, int offTime);
+#line 514 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void headLights(int state);
+#line 520 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void rearLights(int state);
+#line 527 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void allFlash(int on, int off);
+#line 539 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void whoop(int onTime, int offTime);
+#line 558 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void fillUp(int onTime);
+#line 571 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void chase(int onTime, int offTime);
+#line 601 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
+void lighthouse(int onTime, int offTime);
+#line 51 "/home/bwsq/projects/rich/unreason/theunreason/UNREASON_DODGEM_SIDE_RELAY_v3/UNREASON_DODGEM_SIDE_RELAY_v3.ino"
 void setup() {
   Serial.begin(9600);
   pinMode(A15, INPUT_PULLUP);
@@ -87,6 +97,7 @@ void setup() {
    * buttonCounter will get set to a valid value
    */
   Serial.println("<SETUP COMPLETE>");
+
 } // end of setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,9 +194,9 @@ animation elevenStates[] = {
 #endif /*ANIMATION_ARRAY*/
 
 void loop() {
-  
+
   delay(5);
-#ifndef BUTTON_INTERRUPTS
+
   buttonState = digitalRead(BUTTON_PIN);
   // compare the buttonState to its previous state
   if (buttonState != lastButtonState) {
@@ -204,17 +215,7 @@ void loop() {
     delay(5);    // Delay a little bit to avoid bouncing
   }
   lastButtonState = buttonState;
-#else
-  if (buttonCounter != cachedButtonCounter){
-    setjmp(jumpToReset);
-    EEPROM.write(buttonCounterAddr,buttonCounter);
-    cachedButtonCounter = buttonCounter;
-    Serial.print("buttonCounter: ");
-    Serial.println(buttonCounter);
-    allOff();
-    count=0;
-  }
-#endif
+
 
   /*instead of using the switch case
    * we can use our array full of lambdas
@@ -668,4 +669,6 @@ void lighthouse(int onTime, int offTime) {
 
 
 }
+
+
 
