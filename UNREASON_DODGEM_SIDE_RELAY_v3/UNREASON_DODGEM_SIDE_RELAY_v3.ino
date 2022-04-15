@@ -1,7 +1,15 @@
 #include <EEPROM.h>
+
+//Uncomment to use the animation arrays instead of the switch case statements
+// or compile with arduino-cli and
+// --build-property "build.extra_flags=\"-DANIMATION_ARRAY\""
+//#define ANIMATION_ARRAY
+
+//#define BUTTON_INTERRUPTS
+
 volatile unsigned char buttonCounter;   // counter for the number of button presses
 unsigned char cachedButtonCounter;
-#
+
 #ifdef BUTTON_INTERRUPTS
 #include <setjmp.h>
 jmp_buf jumpToReset;
@@ -86,13 +94,13 @@ void setup() {
    * so nothing will display. next time the button is pressed,
    * buttonCounter will get set to a valid value
    */
+#ifdef BUTTON_INTERRUPTS
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN),my_interrupt_handler,RISING);
+#endif
   Serial.println("<SETUP COMPLETE>");
 } // end of setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//Uncomment to use the animation arrays instead of the switch case statements
-#define ANIMATION_ARRAY
 
 #ifdef ANIMATION_ARRAY
 typedef void (*animation)();
