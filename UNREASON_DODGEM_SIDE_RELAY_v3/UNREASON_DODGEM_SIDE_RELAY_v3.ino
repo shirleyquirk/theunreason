@@ -8,7 +8,8 @@
 //#define BUTTON_INTERRUPTS
 
 volatile unsigned char buttonCounter;   // counter for the number of button presses
-unsigned char cachedButtonCounter;
+unsigned char cachedButtonCounter=254;//
+//inline void modbutton();
 
 #ifdef BUTTON_INTERRUPTS
 #include <setjmp.h>
@@ -77,6 +78,7 @@ void my_interrupt_handler()
   if (interrupt_time - last_interrupt_time > 200) 
   {
     buttonCounter++;
+    modbutton();
   }
   last_interrupt_time = interrupt_time;
 }
@@ -91,9 +93,8 @@ void setup() {
   buttonCounter = EEPROM.read(buttonCounterAddr);
   /*
    * the first time this code is booted, buttonCounter will be 255
-   * so nothing will display. next time the button is pressed,
-   * buttonCounter will get set to a valid value
    */
+  modbutton();//make sure bC is always a valid value!
 #ifdef BUTTON_INTERRUPTS
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN),my_interrupt_handler,RISING);
 #endif
@@ -190,10 +191,12 @@ animation elevenStates[] = {
 #define N_BUTTON_STATES 4
 #endif /*ANIMATION_ARRAY*/
 
+//defining this after N_BUTTON_STATES is defined
+inline void modbutton(){buttonCounter = buttonCounter % N_BUTTON_STATES;}
+
 void loop() {
-  
-  delay(5);
 #ifndef BUTTON_INTERRUPTS
+  delay(5);
   buttonState = digitalRead(BUTTON_PIN);
   // compare the buttonState to its previous state
   if (buttonState != lastButtonState) {
@@ -213,8 +216,14 @@ void loop() {
   }
   lastButtonState = buttonState;
 #else
+  
   if (buttonCounter != cachedButtonCounter){
     setjmp(jumpToReset);
+//We need to make sure setjmp runs
+//the first loop on each boot.
+//After setup, bC will always be a valid value
+//First loop, cBC=254, so we'll always drop here
+
     EEPROM.write(buttonCounterAddr,buttonCounter);
     cachedButtonCounter = buttonCounter;
     Serial.print("buttonCounter: ");
