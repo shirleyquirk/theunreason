@@ -220,7 +220,7 @@ void loop() {
   if (buttonCounter != cachedButtonCounter){
     setjmp(jumpToReset);
 //We need to make sure setjmp runs
-//the first loop on each boot.
+//before any call to delay()
 //After setup, bC will always be a valid value
 //First loop, cBC=254, so we'll always drop here
 
