@@ -240,6 +240,7 @@ void loop() {
    */
 #ifdef ANIMATION_ARRAY
   animation_states[buttonCounter]();
+  delay(5);
 #else
 
   /*
